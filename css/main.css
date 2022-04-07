@@ -1,0 +1,70 @@
+
+html {
+    color: #222;
+    font-size: 1em;
+    line-height: 1.4;
+    font-family: monospace;
+}
+
+.game-object {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+}
+
+.game-object__player-tank {
+    background: url('../img/player-tank.png');
+    background-size: contain;
+}
+
+.game-object__enemy-tank {
+    background: url('../img/enemy-tank.png');
+    background-size: contain;
+}
+
+.game-object__wall {
+    background: url('../img/wall.png');
+    background-size: contain;
+}
+
+
+main {
+    width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+#game-field {
+    flex: 1;
+    min-width: 832px;
+    width: 832px;
+}
+#game-map {
+    width: 832px;
+    height: 896px;
+    background: #111;
+}
+#legend {
+    flex: 1 30%;
+    margin-left: 20px;
+}
+
+
+
+   
+
+.legend-list {
+    padding: 0;
+}
+.legend-item {
+    position: relative;
+    padding-left: 70px;
+    margin-bottom: 10px;
+    display: block;
+    height: 64px;
+    line-height: 64px;
+}
+.legend-item .game-object {
+    top: 0;
+    left: 0;
+}
