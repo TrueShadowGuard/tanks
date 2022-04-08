@@ -70,25 +70,18 @@ class Tank {
     }
 
     move() {
-        const isDirectionAvailable = this.availableDirections[this.direction];
-        console.log(isDirectionAvailable)
-        if (!isDirectionAvailable) {
-            this.direction = getRandomAvaliableDirection(this.availableDirections);
-            return;
-        }
-
         switch (this.direction) {
             case DIRECTIONS.TOP:
-                this.y -= 0.5;
+                this.y -= 0.2;
                 break;
             case DIRECTIONS.BOTTOM:
-                this.y += 0.5;
+                this.y += 0.2;
                 break;
             case DIRECTIONS.LEFT:
-                this.x -= 0.5;
+                this.x -= 0.2;
                 break;
             case DIRECTIONS.RIGHT:
-                this.x += 0.5;
+                this.x += 0.2;
                 break;
         }
     }
@@ -103,11 +96,40 @@ export class EnemyTank extends Tank {
         super(x, y, $element);
         this.isMoving = true;
     }
+
+    move() {
+        const isDirectionAvailable = this.availableDirections[this.direction];
+        if (!isDirectionAvailable) {
+            this.direction = getRandomAvaliableDirection(this.availableDirections);
+            return;
+        }
+        super.move();
+    }
 }
 
 export class PlayerTank extends Tank {
     constructor(x, y, $element) {
         super(x, y, $element);
+
+        document.addEventListener("keydown", this.onKeyDown);
+    }
+
+    onKeyDown = e => {
+        this.isMoving = true;
+        switch(e.key) {
+            case "ArrowUp": this.direction = DIRECTIONS.TOP; break;
+            case "ArrowDown": this.direction = DIRECTIONS.BOTTOM; break;
+            case "ArrowLeft": this.direction = DIRECTIONS.LEFT; break;
+            case "ArrowRight": this.direction = DIRECTIONS.RIGHT; break;
+        }
+    }
+
+    move() {
+        const isDirectionAvailable = this.availableDirections[this.direction];
+        if (!isDirectionAvailable) {
+            return;
+        }
+        super.move();
     }
 }
 

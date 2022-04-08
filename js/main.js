@@ -1,9 +1,9 @@
-import {MAP, MAP_LEGEND} from "./map.js";
+import {MAP, MAP_HEIGHT, MAP_LEGEND, MAP_WIDTH} from "./map.js";
 import {EnemyTank, PlayerTank} from "./Tank.js";
 import {toPositionOnMap} from "./utils.js";
 import {Wall} from "./Wall.js";
 
-export const GAME_TIMER_INTERVAL = 300; // задаёт интервал времени, за который будет выполняться один шаг в игре
+export const GAME_TIMER_INTERVAL = 100; // задаёт интервал времени, за который будет выполняться один шаг в игре
 export const PLAYER_LIFE_COUNT = 3;
 export const ENEMY_TANKS_COUNT = 21;
 export const CELL_SIZE = 64;
@@ -77,6 +77,7 @@ function initMap() {
                 case MAP_LEGEND.PLAYER_BASE:
                     elementModel = new PlayerTank(x, y, $element);
                     playerTank = elementModel;
+                    window.playerTank = playerTank;
             }
             updatableElements.push(elementModel);
         });
@@ -114,24 +115,30 @@ function gameStep() {
 }
 
 function checkForCollisions() {
-    for(let tank of enemyTanks) {
+    const tanks = [...enemyTanks, playerTank];
+    for(let tank of tanks) {
         tank.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
-        if(tank.x === 0) tank.availableDirections.LEFT = false;
-        if(tank.x === 12) tank.availableDirections.RIGHT = false;
-        if(tank.y === 0) tank.availableDirections.TOP = false;
-        if(tank.y === 13) tank.availableDirections.BOTTOM = false;
+        
+        if(tank.x <= 0) tank.availableDirections.LEFT = false;
+        if(tank.x >= MAP_WIDTH - 1) tank.availableDirections.RIGHT = false;
+        if(tank.y <= 0) tank.availableDirections.TOP = false;
+        if(tank.y >= MAP_HEIGHT - 1) tank.availableDirections.BOTTOM = false;
         
         for(let wall of walls) {
-            if(wall.x + 1 === tank.x && wall.y === tank.y) {
+            let dx = tank.x - wall.x;
+            let dy = tank.y - wall.y;
+            dx = Math.round(dx * 10) / 10;
+            dy = Math.round(dy * 10) / 10;
+            if((dx <= 1 && dx > 0) && Math.abs(dy) < 1) {
                 tank.availableDirections.LEFT = false;
             }
-            if(wall.x - 1 === tank.x && wall.y === tank.y) {
+            if((dx >= -1 && dx < 0) && Math.abs(dy) < 1) {
                 tank.availableDirections.RIGHT = false;
             }
-            if(wall.y + 1 === tank.y && wall.x === tank.x) {
+            if((dy <= 1 && dy > 0) && Math.abs(dx) < 1) {
                 tank.availableDirections.TOP = false;
             }
-            if(wall.y - 1 === tank.y && wall.x === tank.x) {
+            if((dy >= -1 && dy < 0) && Math.abs(dx) < 1) {
                 tank.availableDirections.BOTTOM = false;
             }
         }

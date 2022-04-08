@@ -21,4 +21,7 @@ var MAP_LEGEND = {
     WALL: 3
 };
 
-export {MAP, MAP_LEGEND};
+const MAP_HEIGHT = MAP.length;
+const MAP_WIDTH = MAP[0].length;
+
+export {MAP, MAP_LEGEND, MAP_WIDTH, MAP_HEIGHT};
