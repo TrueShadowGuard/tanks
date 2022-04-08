@@ -1,8 +1,9 @@
 import {MAP, MAP_LEGEND} from "./map.js";
-import {EnemyTank} from "./Tank.js";
+import {EnemyTank, PlayerTank} from "./Tank.js";
 import {toPositionOnMap} from "./utils.js";
+import {Wall} from "./Wall.js";
 
-export const GAME_TIMER_INTERVAL = 1000; // задаёт интервал времени, за который будет выполняться один шаг в игре
+export const GAME_TIMER_INTERVAL = 300; // задаёт интервал времени, за который будет выполняться один шаг в игре
 export const PLAYER_LIFE_COUNT = 3;
 export const ENEMY_TANKS_COUNT = 21;
 export const CELL_SIZE = 64;
@@ -11,6 +12,14 @@ export const IS_GAME_OVER = false;
 const $gameMap = document.getElementById("game-map");
 
 let updatableElements = [];
+let enemyTanks = [];
+let playerTank;
+
+let walls = [];
+
+window.updatableElements = updatableElements;
+window.walls = walls;
+window.enemyTanks = enemyTanks;
 
 gameInitialization();
 
@@ -55,9 +64,21 @@ function initMap() {
             const $element = elements[elementName](x, y);
             $gameMap.append($element);
             
-            if (elementName === MAP_LEGEND.ENEMY_BASE) {
-                updatableElements.push(new EnemyTank(x, y, $element))
+            let elementModel;
+            switch(elementName) {
+                case MAP_LEGEND.ENEMY_BASE:
+                    elementModel = new EnemyTank(x, y, $element);
+                    enemyTanks.push(elementModel);
+                    break;
+                case MAP_LEGEND.WALL:
+                    elementModel = new Wall(x, y, $element);
+                    walls.push(elementModel);
+                    break;
+                case MAP_LEGEND.PLAYER_BASE:
+                    elementModel = new PlayerTank(x, y, $element);
+                    playerTank = elementModel;
             }
+            updatableElements.push(elementModel);
         });
     });
 }
@@ -88,6 +109,32 @@ function gameStep() {
      * 5. проверить, не закончились ли жизни у игрока или не закончиличь ли танки противника
      * 6. создать новые танки на базах в случае, если кого-то убили на этом шаге
      */
+    checkForCollisions();
     updatableElements.forEach(element => element.update());
+}
+
+function checkForCollisions() {
+    for(let tank of enemyTanks) {
+        tank.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
+        if(tank.x === 0) tank.availableDirections.LEFT = false;
+        if(tank.x === 12) tank.availableDirections.RIGHT = false;
+        if(tank.y === 0) tank.availableDirections.TOP = false;
+        if(tank.y === 13) tank.availableDirections.BOTTOM = false;
+        
+        for(let wall of walls) {
+            if(wall.x + 1 === tank.x && wall.y === tank.y) {
+                tank.availableDirections.LEFT = false;
+            }
+            if(wall.x - 1 === tank.x && wall.y === tank.y) {
+                tank.availableDirections.RIGHT = false;
+            }
+            if(wall.y + 1 === tank.y && wall.x === tank.x) {
+                tank.availableDirections.TOP = false;
+            }
+            if(wall.y - 1 === tank.y && wall.x === tank.x) {
+                tank.availableDirections.BOTTOM = false;
+            }
+        }
+    }
 }
 

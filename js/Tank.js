@@ -1,20 +1,22 @@
 import {CELL_SIZE} from "./main.js";
-import {toPositionOnMap} from "./utils.js";
+import {rotateElement, toPositionOnMap} from "./utils.js";
 
-const DIRECTIONS = {
-    LEFT: 0,
-    RIGHT: 1,
-    TOP: 2,
-    BOTTOM: 3,
+export const DIRECTIONS = {
+    LEFT: "LEFT",
+    RIGHT: "RIGHT",
+    TOP: "TOP",
+    BOTTOM: "BOTTOM",
 }
 
 class Tank {
     constructor(x, y, $element) {
-        this._x = x;
-        this._y = y;
-        this.direction = "bottom";
         this.isMoving = false;
         this.$element = $element;
+
+        this.x = x;
+        this.y = y;
+        this.direction = DIRECTIONS.BOTTOM;
+        this.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
     }
 
     set x(value) {
@@ -27,7 +29,7 @@ class Tank {
     }
 
     set y(value) {
-        this._y= value;
+        this._y = value;
         toPositionOnMap(this.$element, this.x, this.y);
     }
 
@@ -35,14 +37,60 @@ class Tank {
         return this._y;
     }
 
+    set direction(value) {
+        this._direction = value;
+
+        let rotateValue;
+        switch (this.direction) {
+            case DIRECTIONS.LEFT:
+                rotateValue = "270deg"
+                break;
+            case DIRECTIONS.RIGHT:
+                rotateValue = "90deg"
+                break;
+            case DIRECTIONS.BOTTOM:
+                rotateValue = "180deg"
+                break;
+            case DIRECTIONS.TOP:
+                rotateValue = "0deg"
+                break;
+        }
+
+        rotateElement(this.$element, rotateValue);
+    }
+
+    get direction() {
+        return this._direction;
+    }
+
     update() {
-        if(this.isMoving) {
+        if (this.isMoving) {
             this.move()
         }
     }
 
     move() {
-        this.y += 0.1;
+        const isDirectionAvailable = this.availableDirections[this.direction];
+        console.log(isDirectionAvailable)
+        if (!isDirectionAvailable) {
+            this.direction = getRandomAvaliableDirection(this.availableDirections);
+            return;
+        }
+
+        switch (this.direction) {
+            case DIRECTIONS.TOP:
+                this.y -= 0.5;
+                break;
+            case DIRECTIONS.BOTTOM:
+                this.y += 0.5;
+                break;
+            case DIRECTIONS.LEFT:
+                this.x -= 0.5;
+                break;
+            case DIRECTIONS.RIGHT:
+                this.x += 0.5;
+                break;
+        }
     }
 
     fire() {
@@ -55,4 +103,18 @@ export class EnemyTank extends Tank {
         super(x, y, $element);
         this.isMoving = true;
     }
+}
+
+export class PlayerTank extends Tank {
+    constructor(x, y, $element) {
+        super(x, y, $element);
+    }
+}
+
+function getRandomAvaliableDirection(availableDirections) {
+    const directionsArray = Object
+        .entries(availableDirections)
+        .filter(([dir, avaliable]) => avaliable)
+        .map(([dir, avaliable]) => dir);
+    return directionsArray[Math.trunc(Math.random() * directionsArray.length)];
 }
