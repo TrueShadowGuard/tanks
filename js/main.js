@@ -1,13 +1,16 @@
 import {MAP, MAP_HEIGHT, MAP_LEGEND, MAP_WIDTH} from "./map.js";
 import {EnemyTank, PlayerTank} from "./Tank.js";
-import {toPositionOnMap} from "./utils.js";
+import {roundTo, toPositionOnMap} from "./utils.js";
 import {Wall} from "./Wall.js";
 
-export const GAME_TIMER_INTERVAL = 100; // задаёт интервал времени, за который будет выполняться один шаг в игре
+export const GAME_TIMER_INTERVAL = 50; // задаёт интервал времени, за который будет выполняться один шаг в игре
 export const PLAYER_LIFE_COUNT = 3;
 export const ENEMY_TANKS_COUNT = 21;
 export const CELL_SIZE = 64;
 export const IS_GAME_OVER = false;
+
+const intervalObject = {value: GAME_TIMER_INTERVAL};
+window.intervalObject = intervalObject;
 
 const $gameMap = document.getElementById("game-map");
 
@@ -63,9 +66,9 @@ function initMap() {
 
             const $element = elements[elementName](x, y);
             $gameMap.append($element);
-            
+
             let elementModel;
-            switch(elementName) {
+            switch (elementName) {
                 case MAP_LEGEND.ENEMY_BASE:
                     elementModel = new EnemyTank(x, y, $element);
                     enemyTanks.push(elementModel);
@@ -95,7 +98,7 @@ function gameLoop() {
 
         setTimeout(function () {
             gameLoop()
-        }, GAME_TIMER_INTERVAL);
+        }, intervalObject.value);
     }
 }
 
@@ -116,29 +119,27 @@ function gameStep() {
 
 function checkForCollisions() {
     const tanks = [...enemyTanks, playerTank];
-    for(let tank of tanks) {
+    for (let tank of tanks) {
         tank.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
-        
-        if(tank.x <= 0) tank.availableDirections.LEFT = false;
-        if(tank.x >= MAP_WIDTH - 1) tank.availableDirections.RIGHT = false;
-        if(tank.y <= 0) tank.availableDirections.TOP = false;
-        if(tank.y >= MAP_HEIGHT - 1) tank.availableDirections.BOTTOM = false;
-        
-        for(let wall of walls) {
+
+        if (tank.x <= 0) tank.availableDirections.LEFT = false;
+        if (tank.x >= MAP_WIDTH - 1) tank.availableDirections.RIGHT = false;
+        if (tank.y <= 0) tank.availableDirections.TOP = false;
+        if (tank.y >= MAP_HEIGHT - 1) tank.availableDirections.BOTTOM = false;
+
+        for (let wall of walls) {
             let dx = tank.x - wall.x;
             let dy = tank.y - wall.y;
-            dx = Math.round(dx * 10) / 10;
-            dy = Math.round(dy * 10) / 10;
-            if((dx <= 1 && dx > 0) && Math.abs(dy) < 1) {
+            if ((dx <= 1 && dx > 0) && Math.abs(dy) < 1) {
                 tank.availableDirections.LEFT = false;
             }
-            if((dx >= -1 && dx < 0) && Math.abs(dy) < 1) {
+            if ((dx >= -1 && dx < 0) && Math.abs(dy) < 1) {
                 tank.availableDirections.RIGHT = false;
             }
-            if((dy <= 1 && dy > 0) && Math.abs(dx) < 1) {
+            if ((dy <= 1 && dy > 0) && Math.abs(dx) < 1) {
                 tank.availableDirections.TOP = false;
             }
-            if((dy >= -1 && dy < 0) && Math.abs(dx) < 1) {
+            if ((dy >= -1 && dy < 0) && Math.abs(dx) < 1) {
                 tank.availableDirections.BOTTOM = false;
             }
         }

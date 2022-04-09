@@ -1,5 +1,5 @@
 import {CELL_SIZE} from "./main.js";
-import {rotateElement, toPositionOnMap} from "./utils.js";
+import {rotateElement, roundTo, toPositionOnMap} from "./utils.js";
 
 export const DIRECTIONS = {
     LEFT: "LEFT",
@@ -72,18 +72,20 @@ class Tank {
     move() {
         switch (this.direction) {
             case DIRECTIONS.TOP:
-                this.y -= 0.2;
+                this.y -= 0.1;
                 break;
             case DIRECTIONS.BOTTOM:
-                this.y += 0.2;
+                this.y += 0.1;
                 break;
             case DIRECTIONS.LEFT:
-                this.x -= 0.2;
+                this.x -= 0.1;
                 break;
             case DIRECTIONS.RIGHT:
-                this.x += 0.2;
+                this.x += 0.1;
                 break;
         }
+        this.x = roundTo(this.x, 10);
+        this.y = roundTo(this.y, 10);
     }
 
     fire() {
@@ -110,21 +112,34 @@ export class EnemyTank extends Tank {
 export class PlayerTank extends Tank {
     constructor(x, y, $element) {
         super(x, y, $element);
+        this.pressedKeys = {ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false};
 
         document.addEventListener("keydown", this.onKeyDown);
+        document.addEventListener("keyup", this.onKeyUp);
     }
 
     onKeyDown = e => {
         this.isMoving = true;
         switch(e.key) {
-            case "ArrowUp": this.direction = DIRECTIONS.TOP; break;
-            case "ArrowDown": this.direction = DIRECTIONS.BOTTOM; break;
-            case "ArrowLeft": this.direction = DIRECTIONS.LEFT; break;
-            case "ArrowRight": this.direction = DIRECTIONS.RIGHT; break;
+            case "ArrowUp": this.direction = DIRECTIONS.TOP; this.pressedKeys.ArrowUp = true; break;
+            case "ArrowDown": this.direction = DIRECTIONS.BOTTOM; this.pressedKeys.ArrowDown = true; break;
+            case "ArrowLeft": this.direction = DIRECTIONS.LEFT; this.pressedKeys.ArrowLeft = true; break;
+            case "ArrowRight": this.direction = DIRECTIONS.RIGHT; this.pressedKeys.ArrowRight = true; break;
+        }
+    }
+
+    onKeyUp = e => {
+        switch(e.key) {
+            case "ArrowUp": this.pressedKeys.ArrowUp = false; break;
+            case "ArrowDown": this.pressedKeys.ArrowDown = false; break;
+            case "ArrowLeft": this.pressedKeys.ArrowLeft = false; break;
+            case "ArrowRight": this.pressedKeys.ArrowRight = false; break;
         }
     }
 
     move() {
+        if(Object.entries(this.pressedKeys).every(([key, pressed]) => !pressed)) return;
+
         const isDirectionAvailable = this.availableDirections[this.direction];
         if (!isDirectionAvailable) {
             return;

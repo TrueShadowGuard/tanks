@@ -8,3 +8,7 @@ export function toPositionOnMap($element, x, y) {
 export function rotateElement($element, value) {
     $element.style.transform = `rotate(${value})`;
 }
+
+export function roundTo(number, part) {
+    return Math.round(number * part) / part;
+}
