@@ -1,7 +1,7 @@
-import {MapObject} from "./MapObject.js";
+import {ObjectOnMap} from "./ObjectOnMap.js";
 import {DIRECTIONS} from "./Tank.js";
 
-export class Bullet extends MapObject {
+export class Bullet extends ObjectOnMap {
     get isFlying() { return this._isFlying }
     set isFlying(value) {
         this._isFlying = value;

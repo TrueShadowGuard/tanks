@@ -1,6 +1,6 @@
 import {toPositionOnMap} from "./utils.js";
 
-export class MapObject {
+export class ObjectOnMap {
     constructor(x, y, $element) {
         this.$element = $element;
         this.x = x;

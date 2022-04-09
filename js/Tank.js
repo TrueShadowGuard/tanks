@@ -1,6 +1,6 @@
 import {CELL_SIZE} from "./main.js";
 import {rotateElement, roundTo, toPositionOnMap} from "./utils.js";
-import {MapObject} from "./MapObject.js";
+import {ObjectOnMap} from "./ObjectOnMap.js";
 import {Bullet} from "./Bullet.js";
 
 export const DIRECTIONS = {
@@ -10,12 +10,11 @@ export const DIRECTIONS = {
     BOTTOM: "BOTTOM",
 }
 
-class Tank extends MapObject {
+class Tank extends ObjectOnMap {
     constructor(x, y, $element) {
         super(x, y, $element);
         
         this.isMoving = false;
-        this.direction = DIRECTIONS.BOTTOM;
         this.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
         
         this.bullet = new Bullet(x, y);
@@ -75,6 +74,8 @@ class Tank extends MapObject {
 
     fire() {
         const bullet = this.bullet;
+        if(bullet.isFlying) return;
+
         switch(this.direction) {
             case DIRECTIONS.TOP:
                 bullet.y = this.y - 0.1;
@@ -101,7 +102,15 @@ class Tank extends MapObject {
 export class EnemyTank extends Tank {
     constructor(x, y, $element) {
         super(x, y, $element);
+        this.baseX = x;
+        this.baseY = y;
         this.isMoving = true;
+        this.direction = DIRECTIONS.BOTTOM;
+    }
+
+    update() {
+        super.update();
+        if(!this.bullet.isFlying) this.fire();
     }
 
     move() {
@@ -112,11 +121,23 @@ export class EnemyTank extends Tank {
         }
         super.move();
     }
+
+    kill() {
+        this.x = this.baseX;
+        this.y = this.baseY;
+        this.direction = getRandomAvaliableDirection(DIRECTIONS);
+        window.livesCounter.enemyLives--;
+    }
 }
 
 export class PlayerTank extends Tank {
     constructor(x, y, $element) {
         super(x, y, $element);
+        this.baseX = x;
+        this.baseY = y;
+        this.direction = DIRECTIONS.TOP;
+        this.baseDirection = this.direction;
+
         this.pressedKeys = {ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false};
 
         document.addEventListener("keydown", this.onKeyDown);
@@ -151,6 +172,13 @@ export class PlayerTank extends Tank {
             return;
         }
         super.move();
+    }
+
+    kill() {
+        this.x = this.baseX;
+        this.y = this.baseY;
+        this.direction = this.baseDirection;
+        window.livesCounter.playerLives--;
     }
 }
 

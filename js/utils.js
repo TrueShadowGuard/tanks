@@ -12,3 +12,14 @@ export function rotateElement($element, value) {
 export function roundTo(number, part) {
     return Math.round(number * part) / part;
 }
+
+export function isSquareInsideSquare(outsideX, outsideY, outsideSize, insideX, insideY, insideSize) {
+    return (
+        insideX > outsideX &&
+        insideY > outsideY &&
+        (insideX + insideSize / CELL_SIZE) < (outsideX + outsideSize / CELL_SIZE) &&
+        (insideY + insideSize / CELL_SIZE) < (outsideY + outsideSize / CELL_SIZE)
+    );
+}
+
+window.isSquareInsideSquare = isSquareInsideSquare;

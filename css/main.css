@@ -77,3 +77,15 @@ main {
     top: 0;
     left: 0;
 }
+
+.heart {
+    width: 64px;
+    height: 64px;
+    padding: 0 10px;
+}
+
+#player-lives, #enemy-lives {
+    display: inline-block;
+    font-size: 64px;
+    width: 64px;
+}

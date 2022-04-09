@@ -13,8 +13,13 @@
 </head>
 
 <body>
-<main>
+<main></main>
 
+<script src="js/map.js" type="module"></script>
+<script src="js/main.js" type="module"></script>
+</body>
+
+<template id="game-template">
     <section id="game-field">
         <h2>ISsoft: Tanks</h2>
 
@@ -28,23 +33,17 @@
         <ul class="legend-list">
             <li class="legend-item">
                 <div class="game-object game-object__player-tank"></div>
-                танк игрока
+                <div>
+                    <span id="player-lives"></span><img class="heart" src="./img/heart.png" alt="heart">
+                </div>
             </li>
             <li class="legend-item">
                 <div class="game-object game-object__enemy-tank"></div>
-                вражеский танк
-            </li>
-            <li class="legend-item">
-                <div class="game-object game-object__wall"></div>
-                стена
+                <div>
+                    <span id="enemy-lives"></span><img class="heart" src="./img/heart.png" alt="heart">
+                </div>
             </li>
         </ul>
     </section>
-</main>
-
-
-<script src="js/map.js" type="module"></script>
-<script src="js/main.js" type="module"></script>
-</body>
-
+</template>
 </html>

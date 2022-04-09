@@ -1,125 +1,130 @@
 import {MAP, MAP_HEIGHT, MAP_LEGEND, MAP_WIDTH} from "./map.js";
 import {EnemyTank, PlayerTank} from "./Tank.js";
-import {roundTo, toPositionOnMap} from "./utils.js";
+import {isSquareInsideSquare, toPositionOnMap} from "./utils.js";
 import {Wall} from "./Wall.js";
+import {LivesCounter} from "./LivesCounter.js";
 
 export const GAME_TIMER_INTERVAL = 50; // задаёт интервал времени, за который будет выполняться один шаг в игре
 export const PLAYER_LIFE_COUNT = 3;
 export const ENEMY_TANKS_COUNT = 21;
 export const CELL_SIZE = 64;
+export const BULLET_SIZE = 8;
 export const IS_GAME_OVER = false;
 
-const intervalObject = {value: GAME_TIMER_INTERVAL};
-window.intervalObject = intervalObject;
+startGame();
 
-const $gameMap = document.getElementById("game-map");
+function startGame() {
+    document.querySelector("main").innerHTML = document.getElementById("game-template").innerHTML;
 
-let updatableElements = [];
-let enemyTanks = [];
-let playerTank;
+    const $playerLives = document.getElementById("player-lives");
+    const $enemyLives = document.getElementById("enemy-lives")
+    const intervalObject = {value: GAME_TIMER_INTERVAL};
+    window.intervalObject = intervalObject;
 
-let walls = [];
+    window.livesCounter = new LivesCounter($playerLives, $enemyLives, PLAYER_LIFE_COUNT, ENEMY_TANKS_COUNT, startGame);
 
-window.updatableElements = updatableElements;
-window.walls = walls;
-window.enemyTanks = enemyTanks;
+    const $gameMap = document.getElementById("game-map");
 
-gameInitialization();
+    let updatableElements = [];
+    let enemyTanks = [];
+    let playerTank;
+    let walls = [];
 
+    window.updatableElements = updatableElements;
+    window.walls = walls;
+    window.enemyTanks = enemyTanks;
 
-/**
- * Жизненный цикл игры
- * вызывает функцию gameLoop каждые GAME_TIMER_INTERVAL до тех пор, пока игра не закончится
- * (чтобы закончить игру, установите занчение переменной IS_GAME_OVER в true)
- */
-gameLoop();
+    gameInitialization();
 
+    gameLoop();
 
-function gameInitialization() {
-    initMap();
-}
-
-function initMap() {
-    const elements = {
-        [MAP_LEGEND.PLAYER_BASE]: (x, y) => {
-            const $playerTank = document.createElement("div");
-            $playerTank.className = "game-object game-object__player-tank";
-            toPositionOnMap($playerTank, x, y);
-            return $playerTank;
-        },
-        [MAP_LEGEND.ENEMY_BASE]: (x, y) => {
-            const $enemyTank = document.createElement("div");
-            $enemyTank.className = "game-object game-object__enemy-tank";
-            toPositionOnMap($enemyTank, x, y);
-            return $enemyTank;
-        },
-        [MAP_LEGEND.WALL]: (x, y) => {
-            const $wall = document.createElement("div");
-            $wall.className = "game-object game-object__wall";
-            toPositionOnMap($wall, x, y);
-            return $wall;
-        }
-    };
-    MAP.forEach((row, y) => {
-        row.forEach((elementName, x) => {
-            if (!elements[elementName]) return;
-
-            const $element = elements[elementName](x, y);
-            $gameMap.append($element);
-
-            let elementModel;
-            switch (elementName) {
-                case MAP_LEGEND.ENEMY_BASE:
-                    elementModel = new EnemyTank(x, y, $element);
-                    enemyTanks.push(elementModel);
-                    break;
-                case MAP_LEGEND.WALL:
-                    elementModel = new Wall(x, y, $element);
-                    walls.push(elementModel);
-                    break;
-                case MAP_LEGEND.PLAYER_BASE:
-                    elementModel = new PlayerTank(x, y, $element);
-                    playerTank = elementModel;
-                    window.playerTank = playerTank;
-            }
-            updatableElements.push(elementModel);
-        });
-    });
-}
-
-function gameLoop() {
-    if (IS_GAME_OVER !== true) {
-
-        /**
-         * вот именно в функции gameStep стоит разместить код, который будет выполняться на каждом шаге игрового цикла
-         */
-        gameStep();
-
-
-        setTimeout(function () {
-            gameLoop()
-        }, intervalObject.value);
+    function gameInitialization() {
+        initMap();
     }
-}
+    function initMap() {
+        const elements = {
+            [MAP_LEGEND.PLAYER_BASE]: (x, y) => {
+                const $playerTank = document.createElement("div");
+                $playerTank.className = "game-object game-object__player-tank";
+                toPositionOnMap($playerTank, x, y);
+                return $playerTank;
+            },
+            [MAP_LEGEND.ENEMY_BASE]: (x, y) => {
+                const $enemyTank = document.createElement("div");
+                $enemyTank.className = "game-object game-object__enemy-tank";
+                toPositionOnMap($enemyTank, x, y);
+                return $enemyTank;
+            },
+            [MAP_LEGEND.WALL]: (x, y) => {
+                const $wall = document.createElement("div");
+                $wall.className = "game-object game-object__wall";
+                toPositionOnMap($wall, x, y);
+                return $wall;
+            }
+        };
+        MAP.forEach((row, y) => {
+            row.forEach((elementName, x) => {
+                if (!elements[elementName]) return;
 
-function gameStep() {
-    /**
-     * это то самое место, где стоит делать основные шаги игрового цикла
-     * например, как нам кажется, можно было бы сделать следующее
-     * 1. передвинуть пули
-     * 2. рассчитать, где танки окажутся после этого шага
-     * 3. проверить столкновения (пуль с танками, пуль со стенами, танков со стенами и танков с танками)
-     * 4. убрать с поля мертвые танки и разрушенные стены
-     * 5. проверить, не закончились ли жизни у игрока или не закончиличь ли танки противника
-     * 6. создать новые танки на базах в случае, если кого-то убили на этом шаге
-     */
-    checkForCollisions();
-    updatableElements.forEach(element => element.update());
-}
+                const $element = elements[elementName](x, y);
+                $gameMap.append($element);
 
-function checkForCollisions() {
-    const tanks = [...enemyTanks, playerTank];
-    for (let tank of tanks) {
+                let elementModel;
+                switch (elementName) {
+                    case MAP_LEGEND.ENEMY_BASE:
+                        elementModel = new EnemyTank(x, y, $element);
+                        enemyTanks.push(elementModel);
+                        break;
+                    case MAP_LEGEND.WALL:
+                        elementModel = new Wall(x, y, $element);
+                        elementModel.onDestroy = () => {
+                            walls = walls.filter(wall => wall !== elementModel);
+                        }
+
+                        walls.push(elementModel);
+                        break;
+                    case MAP_LEGEND.PLAYER_BASE:
+                        elementModel = new PlayerTank(x, y, $element);
+                        playerTank = elementModel;
+                        window.playerTank = playerTank;
+                }
+                updatableElements.push(elementModel);
+            });
+        });
+    }
+    function gameLoop() {
+        if (IS_GAME_OVER !== true) {
+
+            /**
+             * вот именно в функции gameStep стоит разместить код, который будет выполняться на каждом шаге игрового цикла
+             */
+            gameStep();
+
+
+            setTimeout(function () {
+                gameLoop()
+            }, intervalObject.value);
+        }
+    }
+    function gameStep() {
+        checkCollisions();
+        updatableElements.forEach(element => element.update());
+    }
+
+    function checkCollisions() {
+        const tanks = [...enemyTanks, playerTank];
+
+        for (let tank of tanks) {
+            checkTankWallsCollisions(tank);
+            checkBulletWallsCollisions(tank.bullet);
+        }
+
+        checkTanksCollision(tanks);
+        checkEnemyBulletsPlayerTankCollision();
+        if(playerTank.bullet.isFlying) checkPlayerBulletEnemyTanksCollision();
+    }
+
+    function checkTankWallsCollisions(tank) {
         tank.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
 
         if (tank.x <= 0) tank.availableDirections.LEFT = false;
@@ -141,6 +146,62 @@ function checkForCollisions() {
             }
             if ((dy >= -1 && dy < 0) && Math.abs(dx) < 1) {
                 tank.availableDirections.BOTTOM = false;
+            }
+        }
+    }
+    function checkTanksCollision(tanks) {
+        for(let tank1 of tanks) {
+            for(let tank2 of tanks) {
+                if(tank1 === tank2) continue;
+
+                let dx = tank1.x - tank2.x;
+                let dy = tank1.y - tank2.y;
+                if ((dx <= 1 && dx > 0) && Math.abs(dy) < 1) {
+                    tank1.availableDirections.LEFT = false;
+                    tank2.availableDirections.RIGHT = false;
+                }
+                if ((dx >= -1 && dx < 0) && Math.abs(dy) < 1) {
+                    tank1.availableDirections.RIGHT = false;
+                    tank2.availableDirections.LEFT = false;
+                }
+                if ((dy <= 1 && dy > 0) && Math.abs(dx) < 1) {
+                    tank1.availableDirections.TOP = false;
+                    tank2.availableDirections.BOTTOM = false;
+                }
+                if ((dy >= -1 && dy < 0) && Math.abs(dx) < 1) {
+                    tank1.availableDirections.BOTTOM = false;
+                    tank2.availableDirections.TOP = false;
+                }
+            }
+        }
+    }
+    function checkBulletWallsCollisions(bullet) {
+        const isBulletOutsideMap = bullet.x > MAP_WIDTH || bullet.x < 0 || bullet.y < 0 || bullet.y > MAP_HEIGHT;
+        if(isBulletOutsideMap) {
+            bullet.isFlying = false;
+            return;
+        }
+
+        for(let wall of walls) {
+            if(isSquareInsideSquare(wall.x, wall.y, CELL_SIZE, bullet.x, bullet.y, BULLET_SIZE)) {
+                wall.destroy();
+                bullet.isFlying = false;
+            }
+        }
+    }
+    function checkPlayerBulletEnemyTanksCollision() {
+        for(let enemyTank of enemyTanks) {
+            if(isSquareInsideSquare(enemyTank.x, enemyTank.y, CELL_SIZE, playerTank.bullet.x, playerTank.bullet.y, BULLET_SIZE)) {
+                enemyTank.kill();
+                playerTank.bullet.isFlying = false;
+            }
+        }
+    }
+    function checkEnemyBulletsPlayerTankCollision() {
+        for(let enemyTank of enemyTanks) {
+            if(isSquareInsideSquare(playerTank.x, playerTank.y, CELL_SIZE, enemyTank.bullet.x, enemyTank.bullet.y, BULLET_SIZE)) {
+                playerTank.kill();
+                enemyTank.bullet.isFlying = false;
             }
         }
     }
