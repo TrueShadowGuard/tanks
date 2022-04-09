@@ -26,6 +26,12 @@ html {
     background-size: contain;
 }
 
+.game-object__bullet {
+    width: 8px;
+    height: 8px;
+    background-color: #ccc;
+}
+
 
 main {
     width: 1100px;

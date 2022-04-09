@@ -1,5 +1,7 @@
 import {CELL_SIZE} from "./main.js";
 import {rotateElement, roundTo, toPositionOnMap} from "./utils.js";
+import {MapObject} from "./MapObject.js";
+import {Bullet} from "./Bullet.js";
 
 export const DIRECTIONS = {
     LEFT: "LEFT",
@@ -8,33 +10,16 @@ export const DIRECTIONS = {
     BOTTOM: "BOTTOM",
 }
 
-class Tank {
+class Tank extends MapObject {
     constructor(x, y, $element) {
+        super(x, y, $element);
+        
         this.isMoving = false;
-        this.$element = $element;
-
-        this.x = x;
-        this.y = y;
         this.direction = DIRECTIONS.BOTTOM;
         this.availableDirections = {LEFT: true, RIGHT: true, TOP: true, BOTTOM: true};
-    }
-
-    set x(value) {
-        this._x = value;
-        toPositionOnMap(this.$element, this.x, this.y);
-    }
-
-    get x() {
-        return this._x;
-    }
-
-    set y(value) {
-        this._y = value;
-        toPositionOnMap(this.$element, this.x, this.y);
-    }
-
-    get y() {
-        return this._y;
+        
+        this.bullet = new Bullet(x, y);
+        window.updatableElements.push(this.bullet);
     }
 
     set direction(value) {
@@ -89,7 +74,27 @@ class Tank {
     }
 
     fire() {
-
+        const bullet = this.bullet;
+        switch(this.direction) {
+            case DIRECTIONS.TOP:
+                bullet.y = this.y - 0.1;
+                bullet.x = this.x + 0.43;
+                break;
+            case DIRECTIONS.BOTTOM:
+                bullet.y = this.y + 1.1;
+                bullet.x = this.x + 0.43;
+                break;
+            case DIRECTIONS.LEFT:
+                bullet.y = this.y + 0.43;
+                bullet.x = this.x - 0.1;
+                break;
+            case DIRECTIONS.RIGHT:
+                bullet.y = this.y + 0.43;
+                bullet.x = this.x + 1.1;
+                break;
+        }
+        bullet.direction = this.direction;
+        bullet.isFlying = true;
     }
 }
 
@@ -120,11 +125,12 @@ export class PlayerTank extends Tank {
 
     onKeyDown = e => {
         this.isMoving = true;
-        switch(e.key) {
+        switch(e.code) {
             case "ArrowUp": this.direction = DIRECTIONS.TOP; this.pressedKeys.ArrowUp = true; break;
             case "ArrowDown": this.direction = DIRECTIONS.BOTTOM; this.pressedKeys.ArrowDown = true; break;
             case "ArrowLeft": this.direction = DIRECTIONS.LEFT; this.pressedKeys.ArrowLeft = true; break;
             case "ArrowRight": this.direction = DIRECTIONS.RIGHT; this.pressedKeys.ArrowRight = true; break;
+            case "Space": this.fire();
         }
     }
 
