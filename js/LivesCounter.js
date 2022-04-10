@@ -1,12 +1,12 @@
 export class LivesCounter {
-    constructor($playerLives, $enemyLives, playerLives, enemyLives, startGame) {
+    constructor($playerLives, $enemyLives, playerLives, enemyLives, restartGame) {
         this.$playerLives = $playerLives;
         this.$enemyLives = $enemyLives;
         
         this.playerLives = playerLives;
         this.enemyLives = enemyLives;
 
-        this.restartGame = startGame;
+        this.restartGame = restartGame;
     }
 
     set playerLives(value) {

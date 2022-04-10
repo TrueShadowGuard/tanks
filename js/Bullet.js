@@ -23,16 +23,16 @@ export class Bullet extends ObjectOnMap {
         if(!this.isFlying) return;
         switch (this.direction) {
             case DIRECTIONS.LEFT:
-                this.x -= 0.2;
+                this.x -= 0.15;
                 break;
             case DIRECTIONS.RIGHT:
-                this.x += 0.2;
+                this.x += 0.15;
                 break;
             case DIRECTIONS.TOP:
-                this.y -= 0.2;
+                this.y -= 0.15;
                 break;
             case DIRECTIONS.BOTTOM:
-                this.y += 0.2;
+                this.y += 0.15;
                 break;
         }
     }
