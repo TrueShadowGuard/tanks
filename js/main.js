@@ -1,14 +1,15 @@
 import {MAP, MAP_HEIGHT, MAP_LEGEND, MAP_WIDTH} from "./map.js";
-import {EnemyTank, PlayerTank} from "./Tank.js";
 import {isSquareInsideSquare, toPositionOnMap} from "./utils.js";
-import {Wall} from "./Wall.js";
+import {Wall} from "./objectsOnMap/Wall.js";
 import {LivesCounter} from "./LivesCounter.js";
+import {EnemyTank} from "./objectsOnMap/EnemyTank.js";
+import {PlayerTank} from "./objectsOnMap/PlayerTank.js";
 
-export const GAME_TIMER_INTERVAL = 50; // задаёт интервал времени, за который будет выполняться один шаг в игре
+export const GAME_TIMER_INTERVAL = 50;
 export const PLAYER_LIFE_COUNT = 3;
 export const ENEMY_TANKS_COUNT = 21;
 export const CELL_SIZE = 64;
-export const BULLET_SIZE = 1;
+export const BULLET_SIZE = 8;
 
 startGame();
 
@@ -94,7 +95,7 @@ function startGame() {
             
             setTimeout(function () {
                 gameLoop()
-            }, 50);
+            }, GAME_TIMER_INTERVAL);
         }
     }
     function gameStep() {

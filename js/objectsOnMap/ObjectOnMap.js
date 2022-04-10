@@ -1,4 +1,4 @@
-import {toPositionOnMap} from "./utils.js";
+import {toPositionOnMap} from "../utils.js";
 
 export class ObjectOnMap {
     constructor(x, y, $element) {

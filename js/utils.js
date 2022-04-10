@@ -22,4 +22,10 @@ export function isSquareInsideSquare(outsideX, outsideY, outsideSize, insideX, i
     );
 }
 
-window.isSquareInsideSquare = isSquareInsideSquare;
+export function getRandomAvaliableDirection(availableDirections) {
+    const directionsArray = Object
+        .entries(availableDirections)
+        .filter(([dir, avaliable]) => avaliable)
+        .map(([dir, avaliable]) => dir);
+    return directionsArray[Math.trunc(Math.random() * directionsArray.length)];
+}
